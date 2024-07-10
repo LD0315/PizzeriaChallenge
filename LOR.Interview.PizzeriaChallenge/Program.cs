@@ -1,6 +1,4 @@
-﻿
-
-namespace LOR.Interview.PizzeriaChallenge.ConsoleApp
+﻿namespace LOR.Interview.PizzeriaChallenge.ConsoleApp
 {
     class Program
     {
