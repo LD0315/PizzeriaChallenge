@@ -30,11 +30,12 @@
             }
 
             var order = new Order();
+            var availableToppings = new List<string> { "extra cheese", "mayo", "olive oil" };
 
             for (int i = 0; i < pizzaCount; i++)
             {
                 System.Console.WriteLine("What can I get you?");
-                var pizzaType = System.Console.ReadLine() ?? string.Empty;
+                var pizzaType = System.Console.ReadLine()?.Trim() ?? string.Empty;
 
                 if (string.IsNullOrEmpty(pizzaType))
                 {
@@ -46,7 +47,29 @@
 
                 if (pizza != null)
                 {
-                    order.AddPizza(pizza);
+                    System.Console.WriteLine("Choose additional toppings:");
+                    System.Console.WriteLine(string.Join(", ", availableToppings));
+                    var toppingsInput = System.Console.ReadLine()?.ToLowerInvariant();
+                    var selectedToppings = new List<string>();
+
+                    if (!string.IsNullOrEmpty(toppingsInput))
+                    {
+                        var selectedTopppingsArray = toppingsInput.Split(',').Select(t => t.Trim()).ToList();
+                    
+
+                        foreach (var topping in selectedTopppingsArray)
+                        {
+                            if (availableToppings.Contains(topping))
+                            {
+                                selectedToppings.Add(topping);
+                            }
+                            else
+                            {
+                                System.Console.WriteLine($"'{topping}' is not available.");
+                            }
+                        }
+                    }
+                    order.AddPizza(pizza, selectedToppings);
                 }
                 else
                 {
@@ -133,17 +156,19 @@
         public string Name { get; set; }
         public List<string> Ingredients { get; set; }
         public decimal BasePrice { get; set; }
+        public List<string> AdditionalToppings { get; set; }
 
-        public Pizza(string name, List<string> ingredients, decimal basePrice)
+        public Pizza(string name, List<string> ingredients, decimal basePrice, List<string>? additionalToppings = null)
         {
             Name = name;
             Ingredients = ingredients;
             BasePrice = basePrice;
+            AdditionalToppings = additionalToppings ?? new List<string>();
         }
 
         public void Prepare()
         {
-            System.Console.WriteLine(new string('-', 30));
+            System.Console.WriteLine(new string('-', 50));
             System.Console.WriteLine("Preparing " + Name + "...");
             System.Console.Write("Adding ");
             foreach (var ingredient in Ingredients)
@@ -155,7 +180,8 @@
 
         public void Bake()
         {
-            System.Console.WriteLine("Baking pizza for " + (Name == "Margherita" ? 15 : 30) + " minutes at 200 degrees...");
+            var (time, temperature) = GetBakingDetails();
+            System.Console.WriteLine($"Baking pizza for {time} minutes at {temperature} degrees...");
         }
 
         public void Cut()
@@ -167,6 +193,37 @@
         {
             System.Console.WriteLine("Putting pizza into a nice box...");
         }
+
+        public void AddAdditionalTopping(string topping)
+        {
+            AdditionalToppings.Add(topping);
+        }
+
+        public string GetAdditionalToppings()
+        {
+            if (AdditionalToppings.Count > 0)
+            {
+                return string.Join(", ", AdditionalToppings);
+            }
+            else
+            {
+                return "No additional toppings";
+            }
+        }
+
+        private (int time, int temperature) GetBakingDetails()
+        {
+            return Name switch
+            {
+                "Margherita" => (15, 200),
+                "Florenza" => (25, 220),
+                "Capriciosa" => (20, 210),
+                "Inferno" => (30, 230),
+                "Pepperoni" => (18, 200),
+                "Super Supreme" => (22, 220),
+                _ => (20, 200), 
+            };
+        }
     }
 
     public class Order
@@ -174,8 +231,9 @@
         private List<Pizza> Pizzas { get; set; } = new List<Pizza>();
         private decimal TotalPrice { get; set; } = 0;
 
-        public void AddPizza(Pizza pizza)
+        public void AddPizza(Pizza pizza, List<string> additionalToppings)
         {
+            pizza.AdditionalToppings.AddRange(additionalToppings);
             Pizzas.Add(pizza);
             TotalPrice += pizza.BasePrice;
         }
@@ -193,6 +251,8 @@
                 pizza.Bake();
                 pizza.Cut();
                 pizza.Box();
+
+                System.Console.WriteLine($"Additional Toppings: {pizza.GetAdditionalToppings()}");
             }
         }
 
