@@ -170,6 +170,8 @@
         {
             System.Console.WriteLine(new string('-', 50));
             System.Console.WriteLine("Preparing " + Name + "...");
+
+
             System.Console.Write("Adding ");
             foreach (var ingredient in Ingredients)
             {
